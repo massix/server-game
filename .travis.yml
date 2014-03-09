@@ -18,5 +18,5 @@ script:
 after_success:
     - cd ./test && ctest ; cd ..
     - make ExperimentalMemCheck
-    - sed -n -e '/LEAK SUMMARY:/,+8p' -e '/^Test\|Test\(ing\)\?: /p' Testing/Temporary/LastDynamicAnalysis_*.log
+    - sed -n -e '/LEAK SUMMARY:/,+8p' -e '/^Test\|Testing:[ ]\|Test:[ ]/p' Testing/Temporary/LastDynamicAnalysis_*.log
 
