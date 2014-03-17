@@ -60,7 +60,6 @@ void Server::runBroadcastReceiver()
 	unsigned int aClientLength(0);
 	struct sockaddr_in aServerAddress;
 	struct sockaddr_in aClientAddress;
-	ssize_t aMessageLength;
 	char aMessageBuffer[UDP_MESSAGE_LIMIT];
 	
 	/* This is used to set a RCV Timeout on the socket */
@@ -111,7 +110,7 @@ void Server::runBroadcastReceiver()
 		// -----------------------------------------------------------------------------------------------
 		// Total                                                                               29 bytes
 
-		aMessageLength = sendto(
+		sendto(
 				aBsdSocket,
 				anOstream.str().c_str(),
 				anOstream.str().size(),
