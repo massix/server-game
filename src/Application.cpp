@@ -37,7 +37,7 @@ void Application::run(int argc, char **argv)
 	/***************************************
 	*  Run the server only if all is set  *
 	***************************************/
-	if (initApplication(argc, argv) and initServer() and initConfigurationFile())
+	if (initApplication(argc, argv) and initConfigurationFile() and initServer())
 	{
 
 		// Broadcast receiver and main loop are run in separated threads
@@ -90,13 +90,24 @@ void Application::clean()
 
 bool Application::initServer()
 {
-	ORWELL_LOG_INFO("Initialize server : publisher tcp://*:" << m_publisherPort << " puller tcp://*:" << m_pullerPort);
+	if (m_publisherPort == 0 or m_pullerPort == 0) {
+		std::cerr << "Unable to find a suitable configuration for the ports (check your command line arguments or ini file)" << std::endl;
+		return false;
+	}
 
+	ORWELL_LOG_INFO("Initialize server : publisher tcp://*:" << m_publisherPort << " puller tcp://*:" << m_pullerPort);
 	std::string aPublisherAddress = "tcp://*:" + boost::lexical_cast<std::string>(m_publisherPort);
 	std::string aPullerAddress = "tcp://*:" + boost::lexical_cast<std::string>(m_pullerPort);
 
 	m_server = new orwell::Server(aPullerAddress, aPublisherAddress, 500);
 	m_broadcastServer = new orwell::BroadcastServer(aPullerAddress, aPublisherAddress);
+
+	for (std::string const & iRobot : m_robotsForContext)
+	{
+		ORWELL_LOG_INFO("Pushing robot in context: " << iRobot);
+		m_server->accessContext().addRobot(iRobot);
+	}
+
 	return true;
 }
 
@@ -146,7 +157,7 @@ bool Application::initConfigurationFile()
 		{
 			std::string aRobotName = aPtree.get<std::string>(iRobot + ".name");
 			ORWELL_LOG_INFO("Pushing robot: " << aRobotName);
-			m_server->accessContext().addRobot(aRobotName);
+			m_robotsForContext.push_back(aRobotName);
 		}
 	}
 	
@@ -248,14 +259,6 @@ bool Application::initApplication(int argc, char **argv)
 		m_consoleDebugLogs = true;
 	}
 
-
-	if (m_publisherPort == 0 or m_pullerPort == 0)
-	{
-		std::cerr << "Missing ports informations" << std::endl;
-		std::cout << aDescription << std::endl;
-		return false;
-	}
-	
 	return true;
 }
 

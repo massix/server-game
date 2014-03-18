@@ -45,6 +45,7 @@ private:
 	uint32_t m_ticInterval;
 	std::string m_rcFilePath;
 	std::vector<std::string> m_robotsList;
+	std::vector<std::string> m_robotsForContext;
 	bool m_consoleDebugLogs;
 
 };
